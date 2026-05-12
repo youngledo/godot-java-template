@@ -12,13 +12,36 @@ The Maven build creates `target/app.jar`, resolves the matching
 `io.github.youngledo:godot-java-native` platform artifact, and syncs both files
 into `godot/godot-java/`.
 
-## Run Smoke Scene
+## Run from Maven
 
 ```bash
-godot --path godot
+mvn verify -Pgodot-run
 ```
 
-The main scene is a Java `SmokeRunner`. It creates a Java `TemplateNode`, calls a Java method, and exits with code `0` after printing `GODOT_JAVA_TEMPLATE_SMOKE_PASSED`.
+The `godot-run` profile runs the same build and sync steps as `mvn package`,
+then launches Godot with this project's `godot/` directory.
+
+By default it expects a `godot` command on `PATH`. Override it when needed:
+
+```bash
+mvn verify -Pgodot-run -Dgodot.executable=/Applications/Godot.app/Contents/MacOS/Godot
+```
+
+## Doctor
+
+```bash
+mvn verify -Pgodot-doctor
+```
+
+The `godot-doctor` profile verifies the Maven JDK version, Godot project files,
+the synced `app.jar`, the generated Java class registry inside the jar, and the
+platform native library under `godot/godot-java/`.
+
+## Smoke Scene
+
+The main scene is a Java `SmokeRunner`. It creates a Java `TemplateNode`, calls
+a Java method, and exits with code `0` after printing
+`GODOT_JAVA_TEMPLATE_SMOKE_PASSED`.
 
 ## Export
 

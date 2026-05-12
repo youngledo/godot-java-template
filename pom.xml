@@ -24,6 +24,8 @@
         <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
         <maven-dependency-plugin.version>3.7.0</maven-dependency-plugin.version>
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+        <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
+        <godot.executable>godot</godot.executable>
     </properties>
 
     <dependencies>
@@ -197,6 +199,78 @@ godot-java.native.library=${godot.java.native.library}
                 <godot.java.native.classifier>windows-x86_64</godot.java.native.classifier>
                 <godot.java.native.library>libgodot-java.dll</godot.java.native.library>
             </properties>
+        </profile>
+        <profile>
+            <id>godot-run</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>run-godot-project</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${godot.executable}</executable>
+                                    <arguments>
+                                        <argument>--path</argument>
+                                        <argument>${godot.project.dir}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>godot-doctor</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven-antrun-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>doctor-godot-java-layout</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <condition property="doctor.java.ok">
+                                            <matches string="${java.version}" pattern="^(25|[3-9][0-9]).*"/>
+                                        </condition>
+                                        <fail unless="doctor.java.ok">godot-java doctor: JDK 25+ is required. Maven is running on Java ${java.version}.</fail>
+                                        <available file="${godot.project.dir}/project.godot" property="doctor.project.ok"/>
+                                        <fail unless="doctor.project.ok">godot-java doctor: missing ${godot.project.dir}/project.godot.</fail>
+                                        <available file="${godot.project.dir}/godot-java.gdextension" property="doctor.gdextension.ok"/>
+                                        <fail unless="doctor.gdextension.ok">godot-java doctor: missing ${godot.project.dir}/godot-java.gdextension.</fail>
+                                        <available file="${godot.runtime.dir}/app.jar" property="doctor.app.ok"/>
+                                        <fail unless="doctor.app.ok">godot-java doctor: missing ${godot.runtime.dir}/app.jar. Run mvn package.</fail>
+                                        <condition property="doctor.registry.ok">
+                                            <resourceexists>
+                                                <zipentry zipfile="${godot.runtime.dir}/app.jar" name="org/godot/internal/GeneratedClassRegistry.class"/>
+                                            </resourceexists>
+                                        </condition>
+                                        <fail unless="doctor.registry.ok">godot-java doctor: missing org/godot/internal/GeneratedClassRegistry.class in ${godot.runtime.dir}/app.jar. Ensure annotation processing is enabled and run mvn package.</fail>
+                                        <available file="${godot.runtime.dir}/${godot.java.native.library}" property="doctor.native.ok"/>
+                                        <fail unless="doctor.native.ok">godot-java doctor: missing ${godot.runtime.dir}/${godot.java.native.library}. Run mvn package and check the native profile for this platform.</fail>
+                                        <echo>godot-java doctor: OK</echo>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
