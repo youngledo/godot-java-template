@@ -26,6 +26,7 @@
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
         <godot.executable>godot</godot.executable>
+        <jlink.modules>java.base,java.compiler</jlink.modules>
     </properties>
 
     <dependencies>
@@ -265,6 +266,41 @@ godot-java.native.library=${godot.java.native.library}
                                         <fail unless="doctor.native.ok">godot-java doctor: missing ${godot.runtime.dir}/${godot.java.native.library}. Run mvn package and check the native profile for this platform.</fail>
                                         <echo>godot-java doctor: OK</echo>
                                     </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jlink</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>generate-jlink-runtime</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>jlink</executable>
+                                    <arguments>
+                                        <argument>--add-modules</argument>
+                                        <argument>${jlink.modules}</argument>
+                                        <argument>--output</argument>
+                                        <argument>${godot.runtime.dir}/runtime</argument>
+                                        <argument>--strip-debug</argument>
+                                        <argument>--compress</argument>
+                                        <argument>zip-6</argument>
+                                        <argument>--no-header-files</argument>
+                                        <argument>--no-man-pages</argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                         </executions>

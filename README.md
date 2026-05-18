@@ -45,6 +45,23 @@ a Java method, and exits with code `0` after printing
 
 ## Export
 
+Build with bundled JRE (no JDK required on target machine):
+
+```bash
+mvn package -Pjlink
+```
+
+This creates a `runtime/` directory inside `godot/godot-java/` containing a minimal
+JRE (~32 MB). The native library automatically discovers it — no `JAVA_HOME` needed.
+
+To include additional JDK modules (e.g., HTTP client):
+
+```bash
+mvn package -Pjlink -Djlink.modules=java.base,java.compiler,java.net.http
+```
+
+For export without bundled JRE (requires JDK on target):
+
 ```bash
 mkdir -p godot/build/linux
 godot --headless --path godot --export-release Linux godot/build/linux/godot-java-template.x86_64
