@@ -264,6 +264,8 @@ godot-java.native.library=${godot.java.native.library}
                                         <fail unless="doctor.registry.ok">godot-java doctor: missing org/godot/internal/GeneratedClassRegistry.class in ${godot.runtime.dir}/app.jar. Ensure annotation processing is enabled and run mvn package.</fail>
                                         <available file="${godot.runtime.dir}/${godot.java.native.library}" property="doctor.native.ok"/>
                                         <fail unless="doctor.native.ok">godot-java doctor: missing ${godot.runtime.dir}/${godot.java.native.library}. Run mvn package and check the native profile for this platform.</fail>
+                                        <available file="${godot.runtime.dir}/runtime" property="doctor.runtime.ok"/>
+                                        <echo level="info" message="godot-java doctor: runtime/ ${doctor.runtime.ok}"/>
                                         <echo>godot-java doctor: OK</echo>
                                     </target>
                                 </configuration>
